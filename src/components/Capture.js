@@ -7,16 +7,16 @@ const Capture = ({ selectedReader }) => {
   const handleCapture = async () => {
     alert('Por favor, coloca tu dedo en el lector y manténgalo hasta que se capture la huella');
     try {
-      const response = await axios.get('http://localhost:8080/api/fingerprint/capture');
+      const response = await axios.get('http://localhost:8080/api/v1/fingerprint/capture');
       console.log('Fingerprint captured:', response.data);
-      // Intentamos parsear la respuesta como JSON
+      // Si la respuesta es JSON con mensaje de timeout, se muestra el mensaje
       try {
         const parsed = JSON.parse(response.data);
         if (parsed.status === "timeout") {
           alert(parsed.message);
         }
       } catch (err) {
-        // Si no se parsea como JSON, se asume que es la imagen en base64
+        // Si no es JSON, se asume que es la imagen en base64
         alert('Huella capturada con éxito');
         setImage(response.data);
       }

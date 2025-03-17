@@ -11,7 +11,7 @@ const Enrollment = ({ selectedReader }) => {
       alert('Selecciona un lector primero');
       return;
     }
-    axios.post('http://localhost:8080/api/fingerprint/enroll/start')
+    axios.post('http://localhost:8080/api/v1/fingerprint/enroll/start')
       .then(response => {
         setSessionId(response.data);
         setMessage('Enrolamiento iniciado. Captura la primera huella.');
@@ -28,7 +28,7 @@ const Enrollment = ({ selectedReader }) => {
       setMessage('Inicia el enrolamiento primero');
       return;
     }
-    axios.post(`http://localhost:8080/api/fingerprint/enroll/capture/${sessionId}`)
+    axios.post(`http://localhost:8080/api/v1/fingerprint/enroll/capture/${sessionId}`)
       .then(response => {
         setMessage(response.data);
         if (response.data.includes("captures remaining")) {

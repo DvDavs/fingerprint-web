@@ -10,7 +10,7 @@ const Verification = ({ selectedReader }) => {
       alert('Selecciona un lector primero');
       return;
     }
-    axios.post('http://localhost:8080/api/fingerprint/verify/start')
+    axios.post('http://localhost:8080/api/v1/fingerprint/verify/start')
       .then(response => {
         setMessage('Verificación iniciada. Captura la primera huella.');
         setVerificationStarted(true);
@@ -26,10 +26,14 @@ const Verification = ({ selectedReader }) => {
       setMessage('Inicia la verificación primero');
       return;
     }
-    axios.post('http://localhost:8080/api/fingerprint/verify/capture')
+    axios.post('http://localhost:8080/api/v1/fingerprint/verify/capture')
       .then(response => {
         setMessage(response.data);
-        if (response.data.includes("Fingerprints match") || response.data.includes("Fingerprints do not match")) {
+        // Si el mensaje indica que ya se compararon ambas huellas, reiniciamos el estado
+        if (
+          response.data.toLowerCase().includes("match") ||
+          response.data.toLowerCase().includes("do not match")
+        ) {
           setVerificationStarted(false);
         }
       })

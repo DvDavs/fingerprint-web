@@ -10,7 +10,7 @@ const Identification = ({ selectedReader }) => {
       alert('Selecciona un lector primero');
       return;
     }
-    axios.post('http://localhost:8080/api/fingerprint/identify/enroll')
+    axios.post('http://localhost:8080/api/v1/fingerprint/identify/enroll')
       .then(response => {
         setMessage(response.data);
         setEnrolledCount(prev => prev + 1);
@@ -30,7 +30,7 @@ const Identification = ({ selectedReader }) => {
       setMessage('Enrola al menos una huella primero');
       return;
     }
-    axios.post('http://localhost:8080/api/fingerprint/identify')
+    axios.post('http://localhost:8080/api/v1/fingerprint/identify')
       .then(response => setMessage(response.data))
       .catch(error => {
         console.error('Error al identificar huella:', error);
