@@ -10,7 +10,7 @@ const Identification = ({ selectedReader }) => {
       alert('Selecciona un lector primero');
       return;
     }
-    axios.post('http://localhost:8080/api/v1/fingerprint/identify/enroll')
+    axios.post('http://localhost:8080/api/v1/fingerprint/identify')
       .then(response => {
         setMessage(response.data);
         setEnrolledCount(prev => prev + 1);
