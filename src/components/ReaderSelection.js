@@ -6,7 +6,7 @@ const ReaderSelection = ({ onSelect }) => {
   const [selectedReader, setSelectedReader] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/fingerprint/readers')
+    axios.get('http://localhost:8080/api/v1/fingerprint/readers')
       .then(response => {
         console.log('Lectores obtenidos:', response.data);
         setReaders(response.data);
@@ -18,7 +18,7 @@ const ReaderSelection = ({ onSelect }) => {
   }, []);
 
   const handleSelect = (reader) => {
-    axios.post('http://localhost:8080/api/fingerprint/select', null, { params: { readerName: reader } })
+    axios.post('http://localhost:8080/api/v1/fingerprint/select', null, { params: { readerName: reader } })
       .then(response => {
         console.log('Respuesta de selección:', response.data);
         if (response.data.includes("Reader selected")) {
