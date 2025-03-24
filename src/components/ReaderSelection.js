@@ -1,55 +1,58 @@
+// ReaderSelection.js (refactor)
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ReaderSelection = ({ onSelect }) => {
-  const [readers, setReaders] = useState([]);
+  const [availableReaders, setAvailableReaders] = useState([]);
   const [selectedReader, setSelectedReader] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/v1/fingerprint/readers')
+    // 1) Obtener solo los lectores disponibles
+    axios.get('http://localhost:8080/api/v1/multi-fingerprint/available-readers')
       .then(response => {
-        console.log('Lectores obtenidos:', response.data);
-        setReaders(response.data);
+        setAvailableReaders(response.data);
       })
       .catch(error => {
-        console.error('Error al obtener lectores:', error);
-        alert('No se pudieron cargar los lectores');
+        console.error('Error al obtener lectores disponibles:', error);
+        alert('No se pudieron cargar los lectores disponibles');
       });
   }, []);
 
-  const handleSelect = (reader) => {
-    axios.post('http://localhost:8080/api/v1/fingerprint/select', null, { params: { readerName: reader } })
-      .then(response => {
-        console.log('Respuesta de selección:', response.data);
-        if (response.data.includes("Reader selected")) {
-          setSelectedReader(reader);
-          onSelect(reader);
-          alert(`Lector seleccionado: ${reader}`);
-        } else {
-          alert(`Error: ${response.data}`);
-        }
-      })
-      .catch(error => {
-        console.error('Error al seleccionar lector:', error);
-        alert('Error al seleccionar el lector');
-      });
+  const handleSelect = async (readerName) => {
+    try {
+      // 2) Reservar lector
+      const res = await axios.post(
+        `http://localhost:8080/api/v1/multi-fingerprint/reserve/${encodeURIComponent(readerName)}`
+      );
+      if (res.status === 200) {
+        setSelectedReader(readerName);
+        onSelect(readerName); // Notificar al padre
+        alert(`Lector reservado: ${readerName}`);
+      }
+    } catch (error) {
+      console.error('Error al reservar lector:', error);
+      alert('Error al reservar el lector');
+    }
   };
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Selecciona un lector</h2>
-      <ul className="space-y-2">
-        {readers.map(reader => (
+    <div>
+      <h2>Selecciona un lector</h2>
+      <ul>
+        {availableReaders.map(reader => (
           <li key={reader}>
             <button
               onClick={() => handleSelect(reader)}
-              className={`w-full text-left p-2 rounded ${selectedReader === reader ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+              disabled={selectedReader === reader} // si ya está seleccionado
             >
               {reader}
             </button>
           </li>
         ))}
       </ul>
+      {selectedReader && (
+        <p>Lector seleccionado: {selectedReader}</p>
+      )}
     </div>
   );
 };
