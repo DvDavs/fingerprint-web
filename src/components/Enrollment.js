@@ -48,7 +48,7 @@ const Enrollment = ({ selectedReader, userId }) => {
     <div className="p-4 bg-white rounded shadow">
       <h2 className="text-xl font-bold mb-4">Enrolamiento</h2>
       <p>Lector seleccionado: <b>{selectedReader || 'Ninguno'}</b></p>
-      <p>Usuario ID (opcional): <b>{userId || '(no asignado)'}</b></p>
+      <p>Usuario ID (opcional): <b>{35 || '(no asignado)'}</b></p>
 
       <div className="flex space-x-4 my-4">
         <button onClick={startEnrollment} className="bg-blue-600 text-white p-2 rounded">

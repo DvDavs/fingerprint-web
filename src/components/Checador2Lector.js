@@ -49,27 +49,29 @@ function Checador2Lector({ selectedReader }) {
   const subscribeToReaderTopics = () => {
     if (!readerName || !stompClient.current.active) return;
 
-    // Suscripción a /topic/fingerprints/{readerName}
+    const encodedReaderName = encodeURIComponent(readerName);
+
+    // Suscripción a /topic/fingerprints/{encodedReaderName}
     subscriptionFingerprintRef.current = stompClient.current.subscribe(
-      `/topic/fingerprints/${readerName}`,
-      (message) => {
-        const data = JSON.parse(message.body);
-        setLastImage(data.base64);
-      }
+        `/topic/fingerprints/${encodedReaderName}`,
+        (message) => {
+            const data = JSON.parse(message.body);
+            setLastImage(data.base64);
+        }
     );
 
-    // Suscripción a /topic/checador/{readerName}
+    // Suscripción a /topic/checador/{encodedReaderName}
     subscriptionChecadorRef.current = stompClient.current.subscribe(
-      `/topic/checador/${readerName}`,
-      (message) => {
-        const evt = JSON.parse(message.body);
-        setLastChecadorEvent(evt);
-        console.log('ChecadorEvent recibido:', evt);
-      }
+        `/topic/checador/${encodedReaderName}`,
+        (message) => {
+            const evt = JSON.parse(message.body);
+            setLastChecadorEvent(evt);
+            console.log('ChecadorEvent recibido:', evt);
+        }
     );
 
-    console.log(`Suscrito a: /topic/fingerprints/${readerName} y /topic/checador/${readerName}`);
-  };
+    console.log(`Suscrito a: /topic/fingerprints/${encodedReaderName} y /topic/checador/${encodedReaderName}`);
+};
 
   const startChecador = async () => {
     if (!readerName) {

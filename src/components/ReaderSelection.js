@@ -1,34 +1,48 @@
-// ReaderSelection.js (refactor)
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+function generateSessionId() {
+  return Math.random().toString(36).substring(2, 15);
+}
+
 const ReaderSelection = ({ onSelect }) => {
-  const [availableReaders, setAvailableReaders] = useState([]);
+  const [readers, setReaders] = useState([]);
   const [selectedReader, setSelectedReader] = useState(null);
 
+  // Obtener o generar sessionId y guardarlo en localStorage
   useEffect(() => {
-    // 1) Obtener solo los lectores disponibles
-    axios.get('http://localhost:8080/api/v1/multi-fingerprint/available-readers')
+    let sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) {
+      sessionId = generateSessionId();
+      localStorage.setItem('sessionId', sessionId);
+    }
+  }, []);
+
+  useEffect(() => {
+    axios.get('http://localhost:8080/api/v1/multi-fingerprint/auto-select')
       .then(response => {
-        setAvailableReaders(response.data);
+        console.log('Lectores auto-seleccionados:', response.data);
+        return axios.get('http://localhost:8080/api/v1/multi-fingerprint/readers');
+      })
+      .then(resp2 => {
+        setReaders(resp2.data);
       })
       .catch(error => {
-        console.error('Error al obtener lectores disponibles:', error);
-        alert('No se pudieron cargar los lectores disponibles');
+        console.error('Error al obtener lectores:', error);
+        alert('No se pudieron cargar los lectores');
       });
   }, []);
 
-  const handleSelect = async (readerName) => {
+  const handleSelect = async (reader) => {
+    const sessionId = localStorage.getItem('sessionId');
     try {
-      // 2) Reservar lector
       const res = await axios.post(
-        `http://localhost:8080/api/v1/multi-fingerprint/reserve/${encodeURIComponent(readerName)}`
+        `http://localhost:8080/api/v1/multi-fingerprint/reserve/${encodeURIComponent(reader)}?sessionId=${sessionId}`
       );
-      if (res.status === 200) {
-        setSelectedReader(readerName);
-        onSelect(readerName); // Notificar al padre
-        alert(`Lector reservado: ${readerName}`);
-      }
+      console.log('Reserva lector:', res.data);
+      setSelectedReader(reader);
+      onSelect(reader);
+      alert(`Lector reservado: ${reader}`);
     } catch (error) {
       console.error('Error al reservar lector:', error);
       alert('Error al reservar el lector');
@@ -36,23 +50,21 @@ const ReaderSelection = ({ onSelect }) => {
   };
 
   return (
-    <div>
-      <h2>Selecciona un lector</h2>
-      <ul>
-        {availableReaders.map(reader => (
+    <div className="p-4 bg-white rounded shadow">
+      <h2 className="text-xl font-bold mb-4">Selecciona un lector</h2>
+      {readers.length === 0 && <p>No hay lectores detectados</p>}
+      <ul className="space-y-2">
+        {readers.map(reader => (
           <li key={reader}>
             <button
               onClick={() => handleSelect(reader)}
-              disabled={selectedReader === reader} // si ya está seleccionado
+              className={`w-full text-left p-2 rounded ${selectedReader === reader ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
             >
               {reader}
             </button>
           </li>
         ))}
       </ul>
-      {selectedReader && (
-        <p>Lector seleccionado: {selectedReader}</p>
-      )}
     </div>
   );
 };
