@@ -39,13 +39,13 @@ const ReaderSelection = ({ onSelect }) => {
       const res = await axios.post(
         `http://localhost:8080/api/v1/multi-fingerprint/reserve/${encodeURIComponent(reader)}?sessionId=${sessionId}`
       );
-      console.log('Reserva lector:', res.data);
+      console.log("Reserva actualizada:", res.data);
       setSelectedReader(reader);
       onSelect(reader);
       alert(`Lector reservado: ${reader}`);
     } catch (error) {
-      console.error('Error al reservar lector:', error);
-      alert('Error al reservar el lector');
+      console.error("Error al reservar lector:", error);
+      alert("Error al reservar el lector");
     }
   };
 
