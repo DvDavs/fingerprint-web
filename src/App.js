@@ -1,49 +1,63 @@
-// src/App.js
-import React, { useState } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import axios from 'axios';
+
 import ReaderSelection from "./components/ReaderSelection";
 import Capture from "./components/Capture";
-import Verification from "./components/Verification";
-import Identification from "./components/Identification";
+import Checador2Lector from "./components/Checador2Lector";
+import Enrollment from "./components/Enrollment";
 import UserList from "./components/UserList";
 import UserForm from "./components/UserForm";
-import UserIdentification from "./components/UserIdentification";
 
 function App() {
   const [selectedReader, setSelectedReader] = useState(null);
+
+  useEffect(() => {
+    const handleUnload = async () => {
+      const sessionId = localStorage.getItem('sessionId');
+      if (selectedReader && sessionId) {
+        try {
+          await axios.post(`http://localhost:8080/api/v1/multi-fingerprint/release/${encodeURIComponent(selectedReader)}?sessionId=${sessionId}`);
+        } catch (error) {
+          console.error("Error al liberar lector en unload:", error);
+        }
+      }
+    };
+    window.addEventListener('beforeunload', handleUnload);
+    return () => window.removeEventListener('beforeunload', handleUnload);
+  }, [selectedReader]);
 
   return (
     <Router>
       <div className="min-h-screen bg-gray-100">
         <header className="bg-blue-600 text-white p-4">
           <h1 className="text-2xl font-bold">Fingerprint Web App</h1>
-          <nav className="mt-4">
-            <Link to="/" className="mr-4">Inicio</Link>
-            <Link to="/capture" className="mr-4">Captura</Link>
-            <Link to="/verification" className="mr-4">Verificación</Link>
-            <Link to="/users" className="mr-4">Gestión de Usuarios</Link>
-            <Link to="/user-identification" className="mr-4">Identificación de Usuario</Link>
+          <nav className="mt-2 space-x-4">
+            <Link to="/">Inicio</Link>
+            <Link to="/capture">Captura Normal</Link>
+            <Link to="/checador">Checador</Link>
+            <Link to="/enrollment">Enrolamiento</Link>
+            <Link to="/users">Usuarios</Link>
           </nav>
         </header>
         <main className="p-4">
           <ReaderSelection onSelect={setSelectedReader} />
           <Routes>
             <Route path="/capture" element={<Capture selectedReader={selectedReader} />} />
-            <Route path="/verification" element={<Verification selectedReader={selectedReader} />} />
-            <Route path="/identification" element={<Identification selectedReader={selectedReader} />} />
+            <Route path="/checador" element={<Checador2Lector selectedReader={selectedReader} />} />
+            <Route path="/enrollment" element={<Enrollment selectedReader={selectedReader} userId={1} />} />
             <Route path="/users" element={
               <>
-                <UserForm selectedReader={selectedReader} />
+                <UserForm />
                 <UserList />
               </>
-            } />
-            <Route path="/user-identification" element={<UserIdentification />} />
+            }/>
             <Route path="/" element={
               <div>
-                <h2 className="text-xl font-bold mt-4">Bienvenido a la aplicación de huellas</h2>
-                <p>Selecciona un lector y navega por el menú.</p>
+                <h2 className="text-xl font-bold mt-4">Bienvenido</h2>
+                <p>Selecciona un lector y usa el menú para acciones.</p>
               </div>
-            } />
+            }/>
           </Routes>
         </main>
       </div>
